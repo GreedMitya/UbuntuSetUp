@@ -11,11 +11,24 @@ set -e # Exit on error
 
 echo "🚀 Starting Full System Setup..."
 
+# 0. Sudo Setup (No Password Feature)
+echo "------------------------------------------------"
+echo "🔐 Configuring Passwordless Sudo (requested)..."
+# Ask for password once
+sudo -v
+# Keep sudo alive
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
+# Add user to sudoers for NOPASSWD (future-proof)
+sudo mkdir -p /etc/sudoers.d
+echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER > /dev/null
+sudo chmod 0440 /etc/sudoers.d/$USER
+
 # 1. Update and Basic Tools
 echo "------------------------------------------------"
 echo "📦 Updating system and installing base tools..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl wget git ca-certificates gnupg lsb-release htop software-properties-common apt-transport-https
+sudo apt install -y curl wget git ca-certificates gnupg lsb-release htop software-properties-common apt-transport-https pass
 
 # 2. Hardware Drivers (Check and Install)
 echo "------------------------------------------------"
